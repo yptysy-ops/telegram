@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техподдержка | Black Edition</title>
+    <style>
+        :root {
+            --primary-color: #0A84FF;
+            --secondary-color: #5E5CE6;
+            --background-color: rgba(0, 0, 0, 0.8);
+            --card-color: rgba(28, 28, 30, 0.8);
+            --text-color: #FFFFFF;
+            --error-color: #FF453A;
+            --success-color: #30D158;
+            --warning-color: #FF9F0A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(44, 44, 46, 0.8);
+            font-size: 16px;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            background: rgba(58, 58, 60, 0.8);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #0070E0;
+        }
+
+        button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .form-toggle a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .error {
+            background: rgba(255, 69, 58, 0.2);
+            color: var(--error-color);
+            display: block;
+        }
+
+        .success {
+            background: rgba(48, 209, 88, 0.2);
+            color: var(--success-color);
+            display: block;
+        }
+
+        .warning {
+            background: rgba(255, 159, 10, 0.2);
+            color: var(--warning-color);
+            display: block;
+        }
+
+        .support-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .support-section h3 {
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .support-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(44, 44, 46, 0.8);
+            font-size: 16px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+        }
+
+        .user-info {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .user-info h2 {
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            background: var(--error-color);
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #D70015;
+        }
+
+        .requests-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .requests-section h3 {
+            margin-bottom: 15px;
+        }
+
+        .request-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .request-item {
+            background: rgba(44, 44, 46, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .request-status {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 159, 10, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-in-progress {
+            background: rgba(0, 122, 255, 0.2);
+            color: var(--primary-color);
+        }
+
+        .status-resolved {
+            background: rgba(48, 209, 88, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-rejected {
+            background: rgba(255, 69, 58, 0.2);
+            color: var(--error-color);
+        }
+
+        .request-message {
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .request-response {
+            background: rgba(28, 28, 30, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .request-response.show {
+            display: block;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .request-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .no-requests {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+        }
+
+        .admin-panel {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .admin-panel h3 {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>ТехПоддержка</h1>
+            <p>Black Edition</p>
+        </div>
+
+        <div id="loginForm" class="form-container">
+            <div id="message" class="message"></div>
+            
+            <div class="user-info" id="userInfo">
+                <h2>Добро пожаловать, <span id="userName"></span>!</h2>
+                <p>Вы успешно вошли в систему</p>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
+
+            <div id="authForms">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="your.email@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" placeholder="Ваш пароль">
+                </div>
+                
+                <button id="loginBtn" onclick="login()">Войти</button>
+                
+                <div class="form-toggle">
+                    <p>Нет аккаунта? <a href="#" onclick="toggleForm()">Зарегистрироваться</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="support-section">
+            <h3>Обратиться в техподдержку</h3>
+            <div class="support-form">
+                <textarea id="supportMessage" placeholder="Опишите вашу проблему..."></textarea>
+                <button onclick="sendSupportRequest()">Отправить запрос</button>
+            </div>
+        </div>
+
+        <div class="requests-section">
+            <h3>Мои запросы</h3>
+            <div class="request-list" id="requestList">
+                <div class="no-requests" id="noRequests">У вас пока нет запросов</div>
+            </div>
+        </div>
+
+        <!-- Панель администратора для тестирования -->
+        <div class="admin-panel" id="adminPanel">
+            <h3>Панель администратора (для тестирования)</h3>
+            <div class="form-group">
+                <label for="adminRequestId">ID запроса:</label>
+                <input type="number" id="adminRequestId" placeholder="Введите ID запроса">
+            </div>
+            <div class="form-group">
+                <label for="adminResponse">Ответ поддержки:</label>
+                <textarea id="adminResponse" placeholder="Введите ответ..."></textarea>
+            </div>
+            <div class="request-actions">
+                <button onclick="adminReply()">Ответить на запрос</button>
+                <button onclick="adminClose()">Закрыть запрос</button>
+                <button onclick="adminOpen()">Открыть запрос</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Переменная для отслеживания текущей формы (вход/регистрация)
+        let isLoginForm = true;
+        
+        // Имитация базы данных пользователей
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        
+        // Имитация базы данных запросов
+        let supportRequests = JSON.parse(localStorage.getItem('supportRequests')) || [];
+        
+        // Текущий пользователь
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        
+        // ID Telegram бота и чата администратора (замените на реальные)
+        const TELEGRAM_BOT_TOKEN = '8517405213:AAEsWER1jloth8uR7lVsCjbrsqZYNEgBzfc';
+        const ADMIN_CHAT_ID = '7854326120';
+        
+        // Проверка, авторизован ли пользователь
+        if (currentUser) {
+            showUserInfo();
+            loadUserRequests();
+            
+            // Показываем панель администратора только для arbuzik5222@gmail.com
+            if (currentUser.email === 'arbuzik5222@gmail.com') {
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+        }
+        
+        function toggleForm() {
+            const loginBtn = document.getElementById('loginBtn');
+            const toggleLink = document.querySelector('.form-toggle a');
+            const toggleText = document.querySelector('.form-toggle p');
+            
+            if (isLoginForm) {
+                // Переключаем на регистрацию
+                loginBtn.textContent = 'Зарегистрироваться';
+                loginBtn.setAttribute('onclick', 'register()');
+                toggleText.innerHTML = 'Уже есть аккаунт? <a href="#" onclick="toggleForm()">Войти</a>';
+                isLoginForm = false;
+            } else {
+                // Переключаем на вход
+                loginBtn.textContent = 'Войти';
+                loginBtn.setAttribute('onclick', 'login()');
+                toggleText.innerHTML = 'Нет аккаунта? <a href="#" onclick="toggleForm()">Зарегистрироваться</a>';
+                isLoginForm = true;
+            }
+        }
+        
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = 'message ' + type;
+            
+            // Автоматически скрыть сообщение через 5 секунд
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('Пожалуйста, заполните все поля', 'error');
+                return;
+            }
+            
+            // Проверяем существование пользователя
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showUserInfo();
+                loadUserRequests();
+                
+                // Показываем панель администратора только для arbuzik5222@gmail.com
+                if (currentUser.email === 'arbuzik5222@gmail.com') {
+                    document.getElementById('adminPanel').style.display = 'block';
+                } else {
+                    document.getElementById('adminPanel').style.display = 'none';
+                }
+                
+                showMessage('Успешный вход!', 'success');
+            } else {
+                showMessage('Неверный email или пароль', 'error');
+            }
+        }
+        
+        function register() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('Пожалуйста, заполните все поля', 'error');
+                return;
+            }
+            
+            // Проверяем, занят ли email
+            const emailExists = users.some(u => u.email === email);
+            if (emailExists) {
+                showMessage('Этот email уже используется', 'error');
+                return;
+            }
+            
+            // Создаем нового пользователя
+            const newUser = {
+                email: email,
+                username: email.split('@')[0], // Используем часть email как имя пользователя
+                password: password
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showMessage('Регистрация прошла успешно! Теперь вы можете войти.', 'success');
+            
+            // Переключаем на форму входа
+            toggleForm();
+        }
+        
+        function showUserInfo() {
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('authForms').style.display = 'none';
+            document.getElementById('userName').textContent = currentUser.username;
+        }
+        
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('authForms').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none'; // Скрываем панель при выходе
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('requestList').innerHTML = '<div class="no-requests" id="noRequests">У вас пока нет запросов</div>';
+            showMessage('Вы вышли из системы', 'success');
+        }
+        
+        function sendSupportRequest() {
+            const message = document.getElementById('supportMessage').value;
+            
+            if (!message) {
+                showMessage('Пожалуйста, введите сообщение', 'error');
+                return;
+            }
+            
+            if (!currentUser) {
+                showMessage('Пожалуйста, войдите в систему, чтобы отправить запрос', 'error');
+                return;
+            }
+            
+            // Создаем новый запрос
+            const newRequest = {
+                id: Date.now(),
+                userId: currentUser.email,
+                username: currentUser.username,
+                message: message,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                responses: [],
+                telegramMessageId: null
+            };
+            
+            supportRequests.push(newRequest);
+            localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+            
+            // Отправляем уведомление в Telegram
+            sendTelegramNotification(newRequest);
+            
+            showMessage('Ваш запрос отправлен в техподдержку. Мы ответим вам в ближайшее время.', 'success');
+            document.getElementById('supportMessage').value = '';
+            
+            // Обновляем список запросов
+            loadUserRequests();
+        }
+        
+        function sendTelegramNotification(request) {
+            const message = `🆕 <b>Новый запрос в техподдержку</b>\n\n👤 <b>Пользователь:</b> ${request.username} (${request.userId})\n📝 <b>Сообщение:</b> ${request.message}\n🆔 <b>ID запроса:</b> ${request.id}\n⏰ <b>Время:</b> ${new Date(request.createdAt).toLocaleString()}\n📊 <b>Статус:</b> Ожидание`;
+            
+            // Создаем инлайн-клавиатуру с кнопками
+            const inlineKeyboard = {
+                inline_keyboard: [
+                    [
+                        { text: "📝 Ответить", callback_data: `reply_${request.id}` },
+                        { text: "✅ Закрыть", callback_data: `close_${request.id}` }
+                    ],
+                    [
+                        { text: "🔄 Открыть", callback_data: `open_${request.id}` }
+                    ]
+                ]
+            };
+            
+            // Отправляем сообщение с инлайн-кнопками
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: ADMIN_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML',
+                    reply_markup: inlineKeyboard
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Сообщение отправлено в Telegram:', data);
+                
+                // Сохраняем ID сообщения для дальнейшего редактирования
+                if (data.ok) {
+                    request.telegramMessageId = data.result.message_id;
+                    localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка отправки в Telegram:', error);
+            });
+        }
+        
+        // Функция для обработки ответа администратора
+        function handleAdminReply(requestId, responseText) {
+            const request = supportRequests.find(req => req.id === parseInt(requestId));
+            if (!request) {
+                console.error('Запрос не найден:', requestId);
+                return { success: false, error: 'Запрос не найден' };
+            }
+            
+            // Обновляем статус запроса
+            request.status = 'in-progress';
+            
+            // Добавляем ответ от поддержки
+            request.responses.push({
+                message: responseText,
+                date: new Date().toISOString(),
+                isAdmin: true
+            });
+            
+            // Сохраняем изменения
+            localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+            
+            // Обновляем интерфейс пользователя, если он онлайн
+            if (currentUser && currentUser.email === request.userId) {
+                loadUserRequests();
+                showMessage('Получен ответ от поддержки по вашему запросу', 'success');
+            }
+            
+            // Обновляем сообщение в Telegram
+            updateTelegramMessage(request);
+            
+            return { success: true, newStatus: request.status };
+        }
+        
+        // Функция для закрытия запроса
+        function handleAdminClose(requestId) {
+            const request = supportRequests.find(req => req.id === parseInt(requestId));
+            if (!request) {
+                console.error('Запрос не найден:', requestId);
+                return { success: false, error: 'Запрос не найден' };
+            }
+            
+            // Обновляем статус запроса
+            request.status = 'resolved';
+            
+            // Добавляем автоматический ответ
+            request.responses.push({
+                message: 'Запрос закрыт администратором. Если проблема не решена, создайте новый запрос.',
+                date: new Date().toISOString(),
+                isAdmin: true
+            });
+            
+            // Сохраняем изменения
+            localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+            
+            // Обновляем интерфейс пользователя, если он онлайн
+            if (currentUser && currentUser.email === request.userId) {
+                loadUserRequests();
+                showMessage('Ваш запрос был закрыт администратором', 'warning');
+            }
+            
+            // Обновляем сообщение в Telegram
+            updateTelegramMessage(request);
+            
+            return { success: true, newStatus: request.status };
+        }
+        
+        // Функция для открытия запроса
+        function handleAdminOpen(requestId) {
+            const request = supportRequests.find(req => req.id === parseInt(requestId));
+            if (!request) {
+                console.error('Запрос не найден:', requestId);
+                return { success: false, error: 'Запрос не найден' };
+            }
+            
+            // Обновляем статус запроса
+            request.status = 'pending';
+            
+            // Добавляем автоматический ответ
+            request.responses.push({
+                message: 'Запрос открыт заново администратором.',
+                date: new Date().toISOString(),
+                isAdmin: true
+            });
+            
+            // Сохраняем изменения
+            localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+            
+            // Обновляем интерфейс пользователя, если он онлайн
+            if (currentUser && currentUser.email === request.userId) {
+                loadUserRequests();
+                showMessage('Ваш запрос был открыт заново администратором', 'success');
+            }
+            
+            // Обновляем сообщение в Telegram
+            updateTelegramMessage(request);
+            
+            return { success: true, newStatus: request.status };
+        }
+        
+        // Функция для обновления сообщения в Telegram
+        function updateTelegramMessage(request) {
+            const statusText = getStatusText(request.status);
+            const statusEmoji = getStatusEmoji(request.status);
+            const lastResponse = request.responses.length > 0 ? 
+                `\n💬 <b>Последний ответ:</b> ${request.responses[request.responses.length - 1].message}` : '';
+            
+            const message = `${getStatusEmoji(request.status)} <b>Запрос в техподдержку</b>\n\n👤 <b>Пользователь:</b> ${request.username} (${request.userId})\n📝 <b>Сообщение:</b> ${request.message}\n🆔 <b>ID запроса:</b> ${request.id}\n⏰ <b>Время:</b> ${new Date(request.createdAt).toLocaleString()}\n📊 <b>Статус:</b> ${statusText}${lastResponse}`;
+            
+            // Обновляем инлайн-клавиатуру в зависимости от статуса
+            let inlineKeyboard;
+            
+            if (request.status === 'resolved') {
+                inlineKeyboard = {
+                    inline_keyboard: [
+                        [
+                            { text: "🔄 Открыть", callback_data: `open_${request.id}` }
+                        ]
+                    ]
+                };
+            } else if (request.status === 'in-progress') {
+                inlineKeyboard = {
+                    inline_keyboard: [
+                        [
+                            { text: "✅ Закрыть", callback_data: `close_${request.id}` },
+                            { text: "🔄 Открыть", callback_data: `open_${request.id}` }
+                        ]
+                    ]
+                };
+            } else {
+                inlineKeyboard = {
+                    inline_keyboard: [
+                        [
+                            { text: "📝 Ответить", callback_data: `reply_${request.id}` },
+                            { text: "✅ Закрыть", callback_data: `close_${request.id}` }
+                        ]
+                    ]
+                };
+            }
+            
+            // Редактируем существующее сообщение
+            if (request.telegramMessageId) {
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_CHAT_ID,
+                        message_id: request.telegramMessageId,
+                        text: message,
+                        parse_mode: 'HTML',
+                        reply_markup: inlineKeyboard
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Сообщение в Telegram обновлено:', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка обновления сообщения в Telegram:', error);
+                });
+            }
+        }
+        
+        function getStatusEmoji(status) {
+            const emojiMap = {
+                'pending': '⏳',
+                'in-progress': '🔄',
+                'resolved': '✅',
+                'rejected': '❌'
+            };
+            return emojiMap[status] || '📝';
+        }
+        
+        function loadUserRequests() {
+            const requestList = document.getElementById('requestList');
+            const userRequests = supportRequests.filter(req => req.userId === currentUser.email);
+            
+            if (userRequests.length === 0) {
+                requestList.innerHTML = '<div class="no-requests" id="noRequests">У вас пока нет запросов</div>';
+                return;
+            }
+            
+            requestList.innerHTML = '';
+            
+            // Сортируем запросы по дате создания (новые сверху)
+            userRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            userRequests.forEach(request => {
+                const requestItem = document.createElement('div');
+                requestItem.className = 'request-item';
+                
+                const statusClass = `status-${request.status.replace(' ', '-')}`;
+                const hasResponse = request.responses.length > 0;
+                
+                requestItem.innerHTML = `
+                    <div class="request-header">
+                        <span>Запрос #${request.id}</span>
+                        <span class="request-status ${statusClass}">${getStatusText(request.status)}</span>
+                    </div>
+                    <div class="request-message">${request.message}</div>
+                    ${hasResponse ? `
+                        <div class="request-response ${hasResponse ? 'show' : ''}">
+                            <strong>Ответ поддержки:</strong>
+                            <p>${request.responses[request.responses.length - 1].message}</p>
+                            <small>${new Date(request.responses[request.responses.length - 1].date).toLocaleString()}</small>
+                        </div>
+                    ` : ''}
+                    <div class="request-actions">
+                        <button class="secondary" onclick="toggleResponse(${request.id})">${hasResponse ? 'Скрыть ответ' : 'Показать ответ'}</button>
+                        <button class="secondary" onclick="deleteRequest(${request.id})">Удалить</button>
+                    </div>
+                `;
+                
+                requestList.appendChild(requestItem);
+            });
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Ожидание',
+                'in-progress': 'В работе',
+                'resolved': 'Решено',
+                'rejected': 'Отклонено'
+            };
+            
+            return statusMap[status] || status;
+        }
+        
+        function toggleResponse(requestId) {
+            const requestItem = document.querySelector(`.request-item:has(button[onclick="toggleResponse(${requestId})"])`);
+            const responseEl = requestItem.querySelector('.request-response');
+            const toggleBtn = requestItem.querySelector('button[onclick^="toggleResponse"]');
+            
+            if (responseEl) {
+                responseEl.classList.toggle('show');
+                toggleBtn.textContent = responseEl.classList.contains('show') ? 'Скрыть ответ' : 'Показать ответ';
+            }
+        }
+        
+        function deleteRequest(requestId) {
+            if (confirm('Вы уверены, что хотите удалить этот запрос?')) {
+                supportRequests = supportRequests.filter(req => req.id !== requestId);
+                localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+                loadUserRequests();
+                showMessage('Запрос удален', 'success');
+            }
+        }
+        
+        // Функции для панели администратора (для тестирования)
+        function adminReply() {
+            const requestId = document.getElementById('adminRequestId').value;
+            const responseText = document.getElementById('adminResponse').value;
+            
+            if (!requestId || !responseText) {
+                showMessage('Заполните ID запроса и ответ', 'error');
+                return;
+            }
+            
+            const result = handleAdminReply(requestId, responseText);
+            if (result.success) {
+                showMessage('Ответ отправлен пользователю', 'success');
+                document.getElementById('adminResponse').value = '';
+            } else {
+                showMessage('Ошибка: ' + result.error, 'error');
+            }
+        }
+        
+        function adminClose() {
+            const requestId = document.getElementById('adminRequestId').value;
+            
+            if (!requestId) {
+                showMessage('Введите ID запроса', 'error');
+                return;
+            }
+            
+            const result = handleAdminClose(requestId);
+            if (result.success) {
+                showMessage('Запрос закрыт', 'success');
+            } else {
+                showMessage('Ошибка: ' + result.error, 'error');
+            }
+        }
+        
+        function adminOpen() {
+            const requestId = document.getElementById('adminRequestId').value;
+            
+            if (!requestId) {
+                showMessage('Введите ID запроса', 'error');
+                return;
+            }
+            
+            const result = handleAdminOpen(requestId);
+            if (result.success) {
+                showMessage('Запрос открыт', 'success');
+            } else {
+                showMessage('Ошибка: ' + result.error, 'error');
+            }
+        }
+        
+        // Имитация вебхука от Telegram (для тестирования)
+        // В реальном приложении это будет обрабатываться на сервере
+        function simulateTelegramWebhook(update) {
+            if (update.callback_query) {
+                const callbackData = update.callback_query.data;
+                const [action, requestId] = callbackData.split('_');
+                
+                let result;
+                
+                if (action === 'reply') {
+                    // Для кнопки "Ответить" отправляем сообщение с просьбой ввести ответ
+                    const message = `Введите ответ на запрос #${requestId}:`;
+                    // В реальном приложении здесь будет отправка сообщения в Telegram
+                    console.log('Telegram bot:', message);
+                    result = { success: true, requiresResponse: true, requestId: requestId };
+                } else if (action === 'close') {
+                    result = handleAdminClose(requestId);
+                } else if (action === 'open') {
+                    result = handleAdminOpen(requestId);
+                }
+                
+                // Отправляем ответ в Telegram
+                if (result && result.success) {
+                    const telegramResponse = `Запрос #${requestId} обновлен. Новый статус: ${result.newStatus}`;
+                    // В реальном приложении здесь будет отправка ответа в Telegram
+                    console.log('Telegram bot:', telegramResponse);
+                }
+            }
+            
+            // Обработка текстовых сообщений от администратора (ответы на запросы)
+            if (update.message && update.message.text && !update.message.text.startsWith('/')) {
+                // В реальном приложении здесь будет логика для определения,
+                // на какой запрос отвечает администратор
+                console.log('Admin message:', update.message.text);
+            }
+        }
+        
+        // Имитация ответов от администратора каждые 30 секунд
+        setInterval(() => {
+            if (supportRequests.length > 0 && Math.random() > 0.7) {
+                const pendingRequests = supportRequests.filter(req => req.status === 'pending');
+                if (pendingRequests.length > 0) {
+                    const randomRequest = pendingRequests[Math.floor(Math.random() * pendingRequests.length)];
+                    const responses = [
+                        "Мы работаем над вашей проблемой. Ожидайте обновлений в ближайшее время.",
+                        "Ваш запрос был принят в работу. Мы свяжемся с вами, когда будет решение.",
+                        "Для решения вашей проблемы нам требуется дополнительная информация. Пожалуйста, уточните детали."
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    // Имитируем ответ администратора
+                    handleAdminReply(randomRequest.id, randomResponse);
+                }
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
