@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #5a52d5;
+            --text: #ffffff;
+            --bg: #0f0f0f;
+            --card-bg: rgba(30, 30, 30, 0.7);
+            --input-bg: rgba(50, 50, 50, 0.6);
+            --error: #ff4757;
+            --success: #2ed573;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(108, 99, 255, 0.1) 0%, transparent 50%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary), #ff7eee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            color: var(--error);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success {
+            color: var(--success);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(40, 40, 40, 0.5);
+            border-radius: 10px;
+            padding: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            margin: 2px;
+        }
+
+        .tab.active {
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #qrCode {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+
+        #qrCode canvas {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(40, 40, 40, 0.5);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .logout-btn {
+            background: var(--error);
+        }
+
+        .logout-btn:hover {
+            background: #ff2e43;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .avatar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .avatar-actions button {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .secondary-btn {
+            background: rgba(108, 99, 255, 0.2);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(108, 99, 255, 0.4);
+        }
+
+        .danger-btn {
+            background: rgba(255, 71, 87, 0.2);
+        }
+
+        .danger-btn:hover {
+            background: rgba(255, 71, 87, 0.4);
+        }
+
+        .profile-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Generator</h1>
+        
+        <div class="welcome-message hidden" id="welcomeMessage">
+            Добро пожаловать, <span id="welcomeUsername"></span>!
+        </div>
+        
+        <div class="tab-container" id="mainTabs">
+            <!-- Эти вкладки показываются только когда пользователь не авторизован -->
+            <div class="tab active" data-tab="login" id="loginTab">Вход</div>
+            <div class="tab" data-tab="register" id="registerTab">Регистрация</div>
+            
+            <!-- Эти вкладки показываются только когда пользователь авторизован -->
+            <div class="tab" data-tab="qr" id="qrTab">Генератор QR</div>
+            <div class="tab" data-tab="settings" id="settingsTab">Настройки</div>
+        </div>
+        
+        <!-- Форма входа -->
+        <div class="tab-content active" id="login">
+            <div class="form-group">
+                <label for="loginUsername">Имя пользователя</label>
+                <input type="text" id="loginUsername" placeholder="Введите имя пользователя">
+                <div class="error" id="loginUsernameError"></div>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Пароль</label>
+                <input type="password" id="loginPassword" placeholder="Введите пароль">
+                <div class="error" id="loginPasswordError"></div>
+            </div>
+            <button id="loginBtn">Войти</button>
+            <div class="success" id="loginSuccess"></div>
+        </div>
+        
+        <!-- Форма регистрации -->
+        <div class="tab-content" id="register">
+            <div class="form-group">
+                <label for="regUsername">Имя пользователя</label>
+                <input type="text" id="regUsername" placeholder="Придумайте имя пользователя">
+                <div class="error" id="regUsernameError"></div>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">Электронная почта</label>
+                <input type="email" id="regEmail" placeholder="Введите вашу почту">
+                <div class="error" id="regEmailError"></div>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Пароль</label>
+                <input type="password" id="regPassword" placeholder="Придумайте пароль">
+                <div class="error" id="regPasswordError"></div>
+            </div>
+            <div class="form-group">
+                <label for="regPasswordConfirm">Подтверждение пароля</label>
+                <input type="password" id="regPasswordConfirm" placeholder="Повторите пароль">
+                <div class="error" id="regPasswordConfirmError"></div>
+            </div>
+            <button id="registerBtn">Зарегистрироваться</button>
+            <div class="success" id="registerSuccess"></div>
+        </div>
+        
+        <!-- Генератор QR-кодов -->
+        <div class="tab-content" id="qr">
+            <div class="form-group">
+                <label for="qrUrl">URL для QR-кода</label>
+                <input type="text" id="qrUrl" placeholder="https://example.com" value="https://example.com">
+                <div class="error" id="qrUrlError"></div>
+            </div>
+            <button id="generateQRBtn">Сгенерировать QR-код</button>
+            <div id="qrCode"></div>
+            <div class="success" id="qrSuccess"></div>
+        </div>
+        
+        <!-- Настройки -->
+        <div class="tab-content" id="settings">
+            <div class="user-info">
+                <div class="avatar-section">
+                    <img src="" alt="Аватар" class="avatar" id="userAvatar">
+                    <div class="avatar-actions">
+                        <button class="secondary-btn" id="changeAvatarBtn">Изменить аватар</button>
+                        <button class="danger-btn" id="removeAvatarBtn">Удалить аватар</button>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" class="hidden">
+                </div>
+                <p><strong>Имя пользователя:</strong> <span id="currentUsername">-</span></p>
+                <p><strong>Электронная почта:</strong> <span id="currentEmail">-</span></p>
+            </div>
+            
+            <div class="profile-section">
+                <h3>Изменение профиля</h3>
+                <div class="form-group">
+                    <label for="newUsername">Новое имя пользователя</label>
+                    <input type="text" id="newUsername" placeholder="Введите новое имя">
+                    <div class="error" id="newUsernameError"></div>
+                </div>
+                <button id="changeUsernameBtn">Изменить имя пользователя</button>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="currentPassword">Текущий пароль</label>
+                    <input type="password" id="currentPassword" placeholder="Введите текущий пароль">
+                    <div class="error" id="currentPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Новый пароль</label>
+                    <input type="password" id="newPassword" placeholder="Введите новый пароль">
+                    <div class="error" id="newPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Подтверждение нового пароля</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Повторите новый пароль">
+                    <div class="error" id="confirmNewPasswordError"></div>
+                </div>
+                <button id="changePasswordBtn">Изменить пароль</button>
+            </div>
+            
+            <button class="logout-btn" id="logoutBtn">Выйти</button>
+            <div class="success" id="settingsSuccess"></div>
+        </div>
+    </div>
+
+    <script>
+        // Имитация базы данных пользователей
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+        // Элементы DOM
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Функции для работы с вкладками
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Активируем выбранную вкладку
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Показываем соответствующий контент
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                
+                // Обновляем информацию в настройках, если пользователь вошел
+                if (tabId === 'settings' && currentUser) {
+                    updateUserInfo();
+                }
+            });
+        });
+
+        // Функция обновления информации о пользователе
+        function updateUserInfo() {
+            document.getElementById('currentUsername').textContent = currentUser.username;
+            document.getElementById('currentEmail').textContent = currentUser.email;
+            document.getElementById('welcomeUsername').textContent = currentUser.username;
+            
+            // Обновление аватара
+            const avatar = document.getElementById('userAvatar');
+            if (currentUser.avatar) {
+                avatar.src = currentUser.avatar;
+            } else {
+                avatar.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiByeD0iNjAiIGZpbGw9IiM2YzYzZmYiLz4KPHBhdGggZD0iTTYwIDMwQzcxLjA0NTcgMzAgODAgMzguOTU0MyA4MCA1MEM4MCA2MS4wNDU3IDcxLjA0NTcgNzAgNjAgNzBDNDguOTU0MyA3MCA0MCA2MS4wNDU3IDQwIDUwQzQwIDM4Ljk1NDMgNDguOTU0MyAzMCA2MCAzMFoiIGZpbGw9IiMxRTE1MjkiLz4KPHBhdGggZD0iTTQ1IDg1QzQ1IDc0IDUyIDY1IDYwIDY1QzY4IDY1IDc1IDc0IDc1IDg1Vjk1Qzc1IDEwMS41IDY5LjUgMTA3IDYzIDEwN0g1N0M1MC41IDEwNyA0NSAxMDEuNSA0NSA5NVY4NVoiIGZpbGw9IiMxRTE1MjkiLz4KPC9zdmc+';
+            }
+        }
+
+        // Функция обновления видимости вкладок
+        function updateTabVisibility() {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const qrTab = document.getElementById('qrTab');
+            const settingsTab = document.getElementById('settingsTab');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            if (currentUser) {
+                // Пользователь авторизован - скрываем вкладки входа/регистрации
+                loginTab.classList.add('hidden');
+                registerTab.classList.add('hidden');
+                qrTab.classList.remove('hidden');
+                settingsTab.classList.remove('hidden');
+                welcomeMessage.classList.remove('hidden');
+                
+                // Активируем вкладку генератора QR по умолчанию
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                qrTab.classList.add('active');
+                document.getElementById('qr').classList.add('active');
+            } else {
+                // Пользователь не авторизован - показываем вкладки входа/регистрации
+                loginTab.classList.remove('hidden');
+                registerTab.classList.remove('hidden');
+                qrTab.classList.add('hidden');
+                settingsTab.classList.add('hidden');
+                welcomeMessage.classList.add('hidden');
+                
+                // Активируем вкладку входа по умолчанию
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                loginTab.classList.add('active');
+                document.getElementById('login').classList.add('active');
+            }
+        }
+
+        // Регистрация
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            
+            // Сброс ошибок
+            resetErrors('register');
+            
+            let hasError = false;
+            
+            // Проверка имени пользователя
+            if (username.length < 3) {
+                showError('regUsernameError', 'Имя пользователя должно содержать минимум 3 символа');
+                hasError = true;
+            } else if (users.find(user => user.username === username)) {
+                showError('regUsernameError', 'Это имя пользователя уже занято');
+                hasError = true;
+            }
+            
+            // Проверка email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('regEmailError', 'Введите корректный email');
+                hasError = true;
+            } else if (users.find(user => user.email === email)) {
+                showError('regEmailError', 'Этот email уже зарегистрирован');
+                hasError = true;
+            }
+            
+            // Проверка пароля
+            if (password.length < 6) {
+                showError('regPasswordError', 'Пароль должен содержать минимум 6 символов');
+                hasError = true;
+            }
+            
+            // Проверка подтверждения пароля
+            if (password !== passwordConfirm) {
+                showError('regPasswordConfirmError', 'Пароли не совпадают');
+                hasError = true;
+            }
+            
+            if (!hasError) {
+                // Регистрация пользователя
+                const newUser = {
+                    id: Date.now().toString(),
+                    username,
+                    email,
+                    password,
+                    avatar: null
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                showSuccess('registerSuccess', 'Регистрация прошла успешно! Теперь вы можете войти.');
+                
+                // Очистка формы
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regPasswordConfirm').value = '';
+                
+                // Переключение на вкладку входа
+                setTimeout(() => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="login"]').classList.add('active');
+                    document.getElementById('login').classList.add('active');
+                }, 1500);
+            }
+        });
+
+        // Вход
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Сброс ошибок
+            resetErrors('login');
+            
+            // Поиск пользователя
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (!user) {
+                showError('loginPasswordError', 'Неверное имя пользователя или пароль');
+                return;
+            }
+            
+            // Успешный вход
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showSuccess('loginSuccess', 'Вход выполнен успешно!');
+            
+            // Очистка формы
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Обновление видимости вкладок
+            updateTabVisibility();
+            
+            // Обновление информации в настройках
+            updateUserInfo();
+        });
+
+        // Генерация QR-кода
+        document.getElementById('generateQRBtn').addEventListener('click', () => {
+            const url = document.getElementById('qrUrl').value.trim();
+            const qrCodeContainer = document.getElementById('qrCode');
+            
+            // Сброс ошибок
+            resetErrors('qr');
+            
+            if (!url) {
+                showError('qrUrlError', 'Введите URL для генерации QR-кода');
+                return;
+            }
+            
+            // Добавляем протокол, если его нет
+            let formattedUrl = url;
+            if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                formattedUrl = 'https://' + formattedUrl;
+            }
+            
+            // Очистка предыдущего QR-кода
+            qrCodeContainer.innerHTML = '';
+            
+            try {
+                // Генерация нового QR-кода
+                new QRCode(qrCodeContainer, {
+                    text: formattedUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#6c63ff",
+                    colorLight: "#1e1e1e",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                showSuccess('qrSuccess', 'QR-код успешно сгенерирован!');
+            } catch (error) {
+                console.error('Ошибка при генерации QR-кода:', error);
+                showError('qrUrlError', 'Ошибка при генерации QR-кода');
+            }
+        });
+
+        // Выход
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            
+            // Обновление видимости вкладок
+            updateTabVisibility();
+            
+            showSuccess('loginSuccess', 'Вы успешно вышли из системы!');
+        });
+
+        // Изменение аватара
+        document.getElementById('changeAvatarBtn').addEventListener('click', () => {
+            document.getElementById('avatarInput').click();
+        });
+
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUser.avatar = e.target.result;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Обновление пользователя в базе данных
+                    const userIndex = users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        users[userIndex].avatar = e.target.result;
+                        localStorage.setItem('users', JSON.stringify(users));
+                    }
+                    
+                    updateUserInfo();
+                    showSuccess('settingsSuccess', 'Аватар успешно изменен!');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Удаление аватара
+        document.getElementById('removeAvatarBtn').addEventListener('click', () => {
+            currentUser.avatar = null;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Обновление пользователя в базе данных
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].avatar = null;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            updateUserInfo();
+            showSuccess('settingsSuccess', 'Аватар успешно удален!');
+        });
+
+        // Изменение имени пользователя
+        document.getElementById('changeUsernameBtn').addEventListener('click', () => {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            
+            resetErrors('settings');
+            
+            if (!newUsername) {
+                showError('newUsernameError', 'Введите новое имя пользователя');
+                return;
+            }
+            
+            if (newUsername.length < 3) {
+                showError('newUsernameError', 'Имя пользователя должно содержать минимум 3 символа');
+                return;
+            }
+            
+            if (users.find(user => user.username === newUsername && user.id !== currentUser.id)) {
+                showError('newUsernameError', 'Это имя пользователя уже занято');
+                return;
+            }
+            
+            currentUser.username = newUsername;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Обновление пользователя в базе данных
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].username = newUsername;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            updateUserInfo();
+            document.getElementById('newUsername').value = '';
+            showSuccess('settingsSuccess', 'Имя пользователя успешно изменено!');
+        });
+
+        // Изменение пароля
+        document.getElementById('changePasswordBtn').addEventListener('click', () => {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            
+            resetErrors('settings');
+            
+            if (!currentPassword) {
+                showError('currentPasswordError', 'Введите текущий пароль');
+                return;
+            }
+            
+            if (currentPassword !== currentUser.password) {
+                showError('currentPasswordError', 'Неверный текущий пароль');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showError('newPasswordError', 'Новый пароль должен содержать минимум 6 символов');
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                showError('confirmNewPasswordError', 'Пароли не совпадают');
+                return;
+            }
+            
+            currentUser.password = newPassword;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // Обновление пользователя в базе данных
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            showSuccess('settingsSuccess', 'Пароль успешно изменен!');
+        });
+
+        // Вспомогательные функции
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            
+            // Автоматическое скрытие сообщения об успехе через 3 секунды
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        }
+
+        function resetErrors(formType) {
+            const errorElements = document.querySelectorAll(`#${formType} .error`);
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            const successElements = document.querySelectorAll(`#${formType} .success`);
+            successElements.forEach(element => {
+                element.style.display = 'none';
+            });
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            // Обновление видимости вкладок
+            updateTabVisibility();
+            
+            // Обновление информации о пользователе
+            if (currentUser) {
+                updateUserInfo();
+            }
+            
+            // Автоматически генерируем QR-код при загрузке страницы, если пользователь вошел
+            if (currentUser && document.getElementById('qrUrl').value) {
+                document.getElementById('generateQRBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
